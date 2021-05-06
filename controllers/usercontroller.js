@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const Post = require('../models/Posts')
 const Follow = require('../models/Follow')
-const { findByUsername } = require('../models/User')
+const jwt = require('jsonwebtoken')
 
 exports.doesUsernameExist = function(req, res){
     User.findByUsername(req.body.username).then(function(){
@@ -40,7 +40,6 @@ exports.login = function(req, res){
             res.redirect('/')
         })
     })
-
 }
 
 exports.register = async function(req, res){
@@ -156,5 +155,37 @@ exports.profileFollowingScreen = async function(req, res){
     })
     }catch{
         res.render('404')
+    }
+}
+
+//api related functions
+
+exports.apiLogin = function(req, res){
+    let user = new User(req.body)
+    user.login().then(function(result){
+        res.json(jwt.sign({_id: user.data._id}, process.env.JWTSECRET, {expiresIn: '1d'}))
+
+    }).catch(function(error){
+        res.json("Incorrect credentials")
+    })
+
+}
+
+exports.apiMustBeLoggedIn = function(req, res, next){
+    try{
+        req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET)
+        next()
+    }catch{
+        res.json("Invalid token")
+    }
+}
+
+exports.apiGetPostsbyUsername = async function(req, res){
+    try{
+        let authorDoc = await User.findByUsername(req.params.username)
+        let posts = await Post.findByAuthorId(authorDoc._id)
+        res.json(posts)
+    }catch{
+        res.json("Invalid username")
     }
 }

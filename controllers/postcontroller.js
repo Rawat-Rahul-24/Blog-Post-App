@@ -95,3 +95,22 @@ exports.search = function(req, res){
         res.json([])
     })
 }
+
+//api related functions
+
+exports.apiCreate = function(req, res){
+    let post = new Post(req.body, req.apiUser._id)
+    post.create().then(function(newID){
+        res.json("Post successfully created")
+    }).catch(function(errors){
+        res.json(errors)
+    })
+}
+
+exports.apiDelete = function(req, res){
+    Post.deletePost(req.params.id, req.apiUser._id).then(() => {
+        res.json('Post deleted successfully.')
+    }).catch(() => {
+        res.json("Invalid request")
+    })
+}

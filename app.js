@@ -7,7 +7,11 @@ const markdown = require('marked')
 const sanitizeHtml = require('sanitize-html')
 const csrf = require('csurf')
 
+app.use(express.urlencoded({extended: false}))
+app.use(express.json())
 
+//route for apis
+app.use('/api', require('./router-api'))
 
 var sessionOptions = session({
     secret: "Our app is running",
@@ -21,8 +25,6 @@ const router = require('./router.js')
 
 app.use(sessionOptions)
 app.use(flash())
-app.use(express.urlencoded({extended: false}))
-app.use(express.json())
 app.use(express.static('public'))
 app.set('views', 'views')
 app.set('view engine', 'ejs')
